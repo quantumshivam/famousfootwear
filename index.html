@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Famous Footwear | Premium Collection</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Poppins', 'Mukta', 'sans-serif'] }, colors: { myntra: '#ff3f6c', dark: '#282c3f' } } }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #ffffff; color: #282c3f; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .nav-glass { background: rgba(255, 255, 255, 0.98); border-bottom: 1px solid #f5f5f6; }
+        .product-img-container { aspect-ratio: 3/4; overflow: hidden; background-color: #f5f5f6; position: relative; }
+        .product-img { width: 100%; height: 100%; object-fit: cover; }
+        
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes slideOutRight { from { transform: translateX(0); } to { transform: translateX(100%); } }
+        .modal-enter { animation: slideInRight 0.3s forwards; }
+        .modal-exit { animation: slideOutRight 0.3s forwards; }
+        
+        .snap-slider { scroll-snap-type: x mandatory; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .snap-item { scroll-snap-align: center; }
+
+        #zoomOverlay { transition: opacity 0.3s; }
+        .zoomed-image { transition: transform 0.3s; cursor: zoom-in; }
+        .zoomed-image.zoomed { transform: scale(2); cursor: zoom-out; }
+    </style>
+</head>
+<body class="antialiased relative overflow-x-hidden">
+
+    <!-- 🌟 SIDEBAR OVERLAY & DRAWER 🌟 -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-[60] hidden transition-opacity duration-300 opacity-0" onclick="closeSidebar()"></div>
+    <div id="sidebar" class="fixed top-0 left-0 w-[80%] max-w-[320px] h-full bg-white z-[70] transform -translate-x-full transition-transform duration-300 flex flex-col shadow-2xl overflow-y-auto">
+        <!-- Sidebar Header (Myntra Style) -->
+        <div class="bg-[#3e3b46] p-6 flex justify-between items-center text-white shrink-0">
+            <div class="font-bold flex items-center gap-3">
+                <div class="bg-white text-[#3e3b46] p-2 rounded-sm transform -rotate-6"><i class="fas fa-user text-lg"></i></div>
+                <span class="text-lg tracking-wide">Famous User</span>
+            </div>
+            <button onclick="closeSidebar()" class="text-white text-2xl hover:text-gray-300 transition"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <!-- Sidebar Links -->
+        <div class="flex-1 py-2 flex flex-col">
+            <button onclick="setGenderFromSidebar('Mens')" class="w-full text-left px-6 py-4 border-b border-gray-100 text-dark font-bold hover:bg-gray-50 flex justify-between items-center group">Men <i class="fas fa-chevron-right text-gray-300 text-xs group-hover:text-myntra transition"></i></button>
+            <button onclick="setGenderFromSidebar('Womens')" class="w-full text-left px-6 py-4 border-b border-gray-100 text-dark font-bold hover:bg-gray-50 flex justify-between items-center group">Women <i class="fas fa-chevron-right text-gray-300 text-xs group-hover:text-myntra transition"></i></button>
+            <button onclick="setGenderFromSidebar('Boys')" class="w-full text-left px-6 py-4 border-b border-gray-100 text-dark font-bold hover:bg-gray-50 flex justify-between items-center group">Boys <i class="fas fa-chevron-right text-gray-300 text-xs group-hover:text-myntra transition"></i></button>
+            <button onclick="setGenderFromSidebar('Girls')" class="w-full text-left px-6 py-4 border-b border-gray-100 text-dark font-bold hover:bg-gray-50 flex justify-between items-center group">Girls <i class="fas fa-chevron-right text-gray-300 text-xs group-hover:text-myntra transition"></i></button>
+            <button onclick="setGenderFromSidebar('All')" class="w-full text-left px-6 py-4 border-b border-gray-100 text-dark font-bold hover:bg-gray-50 flex justify-between items-center group">All Categories <i class="fas fa-chevron-right text-gray-300 text-xs group-hover:text-myntra transition"></i></button>
+
+            <div class="h-3 bg-gray-100 w-full my-2"></div>
+
+            <!-- Extra Links -->
+            <a href="https://maps.app.goo.gl/8DTDXhHEiJoCv8dD7" target="_blank" class="px-6 py-4 text-dark font-medium hover:bg-gray-50 flex items-center gap-3 transition">
+                <i class="fas fa-map-marker-alt text-myntra w-5 text-center text-lg"></i> Store Map (दुकान का पता)
+            </a>
+            <a href="https://wa.me/917068059328" target="_blank" class="px-6 py-4 text-dark font-medium hover:bg-gray-50 flex items-center gap-3 transition">
+                <i class="fab fa-whatsapp text-green-500 w-5 text-center text-lg"></i> Contact Us
+            </a>
+        </div>
+        <!-- Banner at bottom of sidebar -->
+        <div class="p-4 bg-orange-50 m-4 rounded-lg border border-orange-200">
+            <h4 class="text-orange-800 font-bold text-sm mb-1">Surprise Gift <i class="fas fa-gift"></i></h4>
+            <p class="text-xs text-orange-700 leading-tight">Kisi bhi jootey par click karein aur 5% ka extra discount token jeetein!</p>
+        </div>
+    </div>
+
+    <!-- 🌟 LIVE TOKEN STATUS BAR 🌟 -->
+    <div id="tokenStatusBar" class="hidden text-white text-center text-xs py-3 px-4 font-bold flex justify-between items-center transition-colors duration-500 z-50 relative">
+       <span id="tokenStatusText" class="flex-1 text-center text-[13px] leading-tight tracking-wide"></span>
+       <button onclick="document.getElementById('tokenStatusBar').style.display='none'" class="text-white/80 hover:text-white ml-3 w-6 h-6 bg-black/20 rounded-full flex items-center justify-center"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="nav-glass relative z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 md:h-20">
+                <div class="flex-shrink-0 flex items-center gap-3 md:gap-4">
+                    <!-- Hamburger Icon -->
+                    <button onclick="openSidebar()" class="text-dark text-xl hover:text-myntra transition pl-1 pr-2">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="bg-dark text-white p-2 rounded-sm transform -rotate-6 cursor-pointer hidden sm:block" onclick="window.scrollTo(0,0)"><i class="fas fa-shoe-prints text-lg"></i></div>
+                    <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-dark uppercase cursor-pointer" onclick="window.scrollTo(0,0)">Famous<span class="text-myntra">Footwear</span></h1>
+                </div>
+                <div class="hidden md:flex flex-1 max-w-xl ml-8">
+                    <div class="relative w-full group">
+                        <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
+                        <input type="text" id="desktopSearch" placeholder="Search for shoes..." class="w-full bg-gray-100 pl-12 pr-4 py-3 rounded-md outline-none text-sm font-medium">
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 text-dark md:hidden">
+                    <button onclick="document.getElementById('mobileSearchContainer').classList.toggle('hidden'); document.getElementById('mobileSearch').focus();" class="text-xl"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+            <!-- Mobile Search Dropdown -->
+            <div id="mobileSearchContainer" class="hidden pb-3 pt-1 transition-all">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-3 text-gray-400"></i>
+                    <input type="text" id="mobileSearch" placeholder="Search shoes..." class="w-full bg-gray-100 pl-12 pr-4 py-2.5 rounded-md outline-none text-sm font-medium">
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Categories & Filter -->
+    <div class="border-b border-gray-200 bg-white relative z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="flex gap-3 overflow-x-auto hide-scrollbar" id="categoryContainer">
+                <button onclick="setCategory('All')" class="category-btn active shrink-0 px-5 py-1.5 rounded-full border border-dark bg-dark text-white text-sm font-semibold transition-colors">All Categories</button>
+                <button onclick="setCategory('Sports/Sneakers')" class="category-btn shrink-0 px-5 py-1.5 rounded-full border border-gray-300 text-gray-600 text-sm font-semibold hover:border-dark transition-colors">Sports & Sneakers</button>
+                <button onclick="setCategory('Casual')" class="category-btn shrink-0 px-5 py-1.5 rounded-full border border-gray-300 text-gray-600 text-sm font-semibold hover:border-dark transition-colors">Casual</button>
+                <button onclick="setCategory('Formal')" class="category-btn shrink-0 px-5 py-1.5 rounded-full border border-gray-300 text-gray-600 text-sm font-semibold hover:border-dark transition-colors">Formal</button>
+            </div>
+            
+            <!-- 🌟 GENDER FILTER 🌟 -->
+            <div class="shrink-0 flex items-center gap-2 self-start md:self-auto bg-gray-50 border border-gray-200 rounded-lg px-2">
+                <span class="text-xs font-bold text-gray-500 uppercase"><i class="fas fa-filter"></i> Filter:</span>
+                <select id="genderFilter" onchange="setGender(this.value)" class="bg-transparent border-none text-sm font-bold py-1.5 outline-none text-dark cursor-pointer">
+                    <option value="All">All (सबके लिए)</option>
+                    <option value="Mens">Mens (आदमी)</option>
+                    <option value="Womens">Womens (औरत)</option>
+                    <option value="Boys">Boys (लड़के)</option>
+                    <option value="Girls">Girls (लड़कियां)</option>
+                    <option value="Unisex">Unisex (कोई भी)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div id="collection" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-[50vh]">
+        <div class="flex items-baseline justify-between mb-6">
+            <h2 class="text-xl md:text-2xl font-bold text-dark uppercase">Trending Now <span id="shoeCount" class="text-sm font-normal text-gray-500 normal-case ml-1"></span></h2>
+        </div>
+        
+        <div id="loadingIndicator" class="text-center py-20">
+            <i class="fas fa-spinner fa-spin text-4xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 font-medium mt-2">Loading Collection...</p>
+        </div>
+
+        <div id="noResults" class="hidden text-center py-20">
+            <h3 class="text-lg font-bold text-dark">No shoes found</h3>
+        </div>
+
+        <div id="shoeContainer" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+            <!-- Cards via JS -->
+        </div>
+    </div>
+
+    <!-- 🌟 FOOTER (STORE LOCATION & MAP) 🌟 -->
+    <footer class="bg-[#282c3f] text-white mt-12 pt-12 pb-6 border-t-4 border-myntra">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div>
+                <h3 class="text-xl font-bold mb-4 uppercase tracking-wider text-white flex items-center">
+                    <div class="bg-white text-[#282c3f] p-1.5 rounded-sm transform -rotate-6 mr-3"><i class="fas fa-shoe-prints text-sm"></i></div> 
+                    Famous Footwear
+                </h3>
+                <p class="text-gray-400 text-sm mb-3 flex items-start">
+                    <i class="fas fa-map-marker-alt w-5 mt-1 text-center text-gray-500 shrink-0"></i> 
+                    <span>Haiderganj, Near Indian Oil Petrol Pump <br> Pincode - 224205</span>
+                </p>
+                <p class="text-gray-400 text-sm mb-3 flex items-center">
+                    <i class="fas fa-phone-alt w-5 text-center text-gray-500 shrink-0"></i> 
+                    <span>+91 70680 59328</span>
+                </p>
+                <p class="text-gray-400 text-sm flex items-center">
+                    <i class="fas fa-clock w-5 text-center text-gray-500 shrink-0"></i> 
+                    <span>रोज़ाना: सुबह 9:00 से रात 8:00 बजे तक</span>
+                </p>
+            </div>
+            <div class="flex flex-col justify-center items-start md:items-end">
+                <p class="text-sm text-gray-400 mb-4 font-medium">दुकान पर आकर हमारी प्रीमियम कलेक्शन देखें!</p>
+                <a href="https://maps.app.goo.gl/8DTDXhHEiJoCv8dD7" target="_blank" class="bg-white text-[#282c3f] px-6 py-3 rounded-lg font-bold text-sm hover:bg-gray-200 transition shadow-lg flex items-center gap-2 active:scale-95 transform">
+                    <i class="fas fa-directions text-myntra text-xl"></i> Google Maps पर देखें
+                </a>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-gray-500 text-xs pt-6 border-t border-gray-700">
+                &copy; 2026 Famous Footwear. सभी अधिकार सुरक्षित हैं।
+            </div>
+        </div>
+    </footer>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="fixed inset-0 z-50 hidden bg-white w-full h-full flex flex-col md:max-w-md md:mx-auto md:border-x md:shadow-2xl">
+        <div class="flex items-center justify-between p-4 bg-white/90 backdrop-blur sticky top-0 z-10 border-b">
+            <button onclick="closeProductModal()" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-dark"><i class="fas fa-arrow-left text-lg"></i></button>
+            <h3 class="font-bold text-dark flex-1 text-center pr-2 uppercase tracking-widest text-sm">Details</h3>
+            <!-- Share Options Button -->
+            <button onclick="openShareModal()" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-100 transition"><i class="fas fa-share-alt"></i></button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto pb-24 bg-gray-50">
+            <!-- FOMO Tag -->
+            <div id="fomoTag" class="bg-red-50 text-red-600 text-xs font-bold p-2 text-center animate-pulse border-b border-red-100"></div>
+
+            <div class="relative w-full bg-white h-[50vh] md:h-96 border-b">
+                <div id="imageSlider" class="flex w-full h-full snap-slider hide-scrollbar relative"></div>
+                <div id="sliderDots" class="absolute bottom-4 left-0 right-0 flex justify-center gap-2"></div>
+                <div class="absolute top-4 right-4 bg-black/60 text-white px-2 py-1 rounded text-[10px] font-bold shadow-sm"><i class="fas fa-search-plus mr-1"></i> Tap to Zoom</div>
+            </div>
+
+            <div class="bg-white p-5 border-b">
+                <span class="text-xs font-bold text-gray-500 uppercase" id="modalShoeCat"></span>
+                <h2 id="modalShoeName" class="text-xl font-bold text-dark mt-1 leading-tight"></h2>
+                <div class="mt-2 flex items-baseline gap-3">
+                    <span class="text-3xl font-black text-dark">₹<span id="modalShoePrice"></span></span>
+                    <span id="modalShoeMrp" class="text-lg text-gray-400 line-through"></span>
+                    <span class="text-sm font-bold text-myntra border border-myntra/30 px-2 rounded bg-myntra/5">(OFFER)</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 mt-2 border-y">
+                <h3 class="font-bold text-dark uppercase tracking-wide text-sm mb-4">Select Size</h3>
+                <div id="sizeButtonsContainer" class="flex flex-wrap gap-3"></div>
+                <input type="hidden" id="selectedSizeValue">
+                <p id="sizeErrorMsg" class="hidden text-myntra text-xs font-bold mt-3">Please select a size first!</p>
+            </div>
+
+            <div class="bg-white p-5 mt-2 border-y">
+                <h3 class="font-bold text-dark uppercase tracking-wide text-sm mb-4 text-myntra"><i class="fas fa-id-card mr-1"></i> Grahak Ki Jankari</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Aapka Naam *</label>
+                        <input type="text" id="customerName" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded focus:border-dark focus:bg-white outline-none font-medium text-sm" placeholder="Rahul Singh" required>
+                        <p id="nameErrorMsg" class="hidden text-myntra text-xs font-bold mt-1">Please enter your name!</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Mobile Number (WhatsApp) *</label>
+                        <input type="tel" id="customerPhone" maxlength="10" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded focus:border-dark focus:bg-white outline-none font-medium text-sm tracking-widest" placeholder="9876543210" required>
+                        <p id="phoneErrorMsg" class="hidden text-myntra text-xs font-bold mt-1">Please enter a valid 10-digit number!</p>
+                    </div>
+                </div>
+
+                <!-- Clear Instructions Box in Hindi -->
+                <div class="bg-green-50 border border-green-200 text-green-800 p-3 rounded-lg mt-4 text-xs leading-relaxed">
+                    <p class="font-bold mb-1.5 text-[13px] text-green-900"><i class="fas fa-info-circle mr-1"></i> डिस्काउंट ऑफर कैसे पाएं:</p>
+                    <ol class="list-decimal pl-4 space-y-1.5 text-green-800 font-medium">
+                        <li>ऊपर दिए गए फॉर्म में अपना नाम और व्हाट्सएप नंबर भरें।</li>
+                        <li>सबसे नीचे दिए गए 'Ask Store via WhatsApp' बटन पर क्लिक करें।</li>
+                        <li>आपकी स्क्रीन पर एक स्क्रैच कार्ड आएगा, उस पर उंगली घिसकर अपना सीक्रेट टोकन नंबर देखें।</li>
+                        <li>स्टोर पर बिल बनवाते समय हमें वह टोकन नंबर दिखाएं और तुरंत <b>5% की छूट (Discount)</b> पाएं!</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-white border-t z-20 pb-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+            <button id="submitBtn" onclick="generateTokenAndShowScratch()" class="w-full bg-[#25D366] hover:bg-[#1DA851] text-white font-bold py-4 rounded shadow-lg flex justify-center items-center gap-2 text-sm uppercase tracking-widest transition-transform active:scale-95">
+                <i class="fab fa-whatsapp text-xl"></i> Ask Store via WhatsApp
+            </button>
+        </div>
+    </div>
+
+     <!-- 🌟 SHARE MODAL 🌟 -->
+    <div id="shareModal" class="fixed inset-0 z-[100] hidden bg-black/60 flex flex-col items-center justify-end md:justify-center p-4 transition-opacity duration-300 opacity-0">
+        <div class="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-sm transform transition-transform translate-y-full md:translate-y-0 scale-100 shadow-2xl" id="shareModalContent">
+            <div class="flex justify-between items-center mb-5 border-b pb-3">
+                <h3 class="font-bold text-dark text-lg">शेयर करें</h3>
+                <button onclick="closeShareModal()" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-dark transition"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <!-- WhatsApp -->
+                <button onclick="shareToPlatform('whatsapp')" class="flex flex-col items-center gap-2 group transition-transform active:scale-95">
+                    <div class="w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center text-3xl shadow-md group-hover:shadow-lg transition"><i class="fab fa-whatsapp"></i></div>
+                    <span class="text-xs font-bold text-gray-700">WhatsApp</span>
+                </button>
+                
+                <!-- Facebook -->
+                <button onclick="shareToPlatform('facebook')" class="flex flex-col items-center gap-2 group transition-transform active:scale-95">
+                    <div class="w-14 h-14 bg-[#1877F2] text-white rounded-full flex items-center justify-center text-3xl shadow-md group-hover:shadow-lg transition"><i class="fab fa-facebook-f"></i></div>
+                    <span class="text-xs font-bold text-gray-700">Facebook</span>
+                </button>
+                
+                <!-- Instagram -->
+                <button onclick="shareToPlatform('instagram')" class="flex flex-col items-center gap-2 group transition-transform active:scale-95">
+                    <div class="w-14 h-14 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white rounded-full flex items-center justify-center text-3xl shadow-md group-hover:shadow-lg transition"><i class="fab fa-instagram"></i></div>
+                    <span class="text-xs font-bold text-gray-700">Instagram</span>
+                </button>
+            </div>
+            
+            <div id="copyToast" class="hidden mt-5 bg-green-100 text-green-800 border border-green-300 text-xs text-center py-2.5 rounded-lg font-bold transition-opacity shadow-sm">
+                <i class="fas fa-check-circle mr-1"></i> डिटेल कॉपी हो गई! इंस्टाग्राम पर पेस्ट करें।
+            </div>
+        </div>
+    </div>
+
+    <!-- 🌟 SCRATCH CARD MODAL 🌟 -->
+    <div id="scratchModal" class="fixed inset-0 z-[100] hidden bg-black/80 flex flex-col items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <div class="bg-white rounded-2xl p-6 text-center w-full max-w-sm relative shadow-2xl scale-95 transition-transform duration-300" id="scratchCardContent">
+            <button onclick="closeScratchModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="bg-myntra/10 text-myntra w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-gift text-2xl"></i>
+            </div>
+            <h2 class="text-xl font-bold text-dark mb-1">Aapka Surprise Gift!</h2>
+            <p class="text-xs text-gray-500 mb-5 font-medium">Poore bill par <span class="font-bold text-dark">5% Chhoot</span> pane ke liye ise scratch karein</p>
+            
+            <div class="relative w-full h-40 bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-emerald-500 overflow-hidden select-none">
+                <div id="revealedContent" class="opacity-0 transition-opacity duration-500 z-10 w-full px-4">
+                    <p class="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Aapka Discount Token</p>
+                    <p id="displayToken" class="text-3xl font-black text-dark tracking-widest my-1 border-b-2 border-emerald-200 pb-1"></p>
+                    <p id="displayExpiry" class="text-[10px] font-bold text-red-500 mt-1"><i class="far fa-clock"></i> Valid till: <span id="expDateText"></span></p>
+                </div>
+                <canvas id="scratchCanvas" class="absolute inset-0 w-full h-full cursor-pointer z-20 touch-none"></canvas>
+            </div>
+            
+            <button id="finalWaBtn" onclick="sendFinalWhatsApp()" class="hidden w-full bg-[#25D366] hover:bg-[#1DA851] text-white font-bold py-3 rounded-lg mt-6 shadow-lg flex justify-center items-center gap-2 transition-transform active:scale-95 text-sm uppercase tracking-wider">
+                <i class="fab fa-whatsapp text-xl"></i> WhatsApp Par Bhejein
+            </button>
+            <p id="scratchHint" class="text-[10px] text-gray-400 mt-4 animate-pulse"><i class="fas fa-hand-pointer mr-1"></i> Box ke upar ungli ghis kar scratch karein</p>
+        </div>
+    </div>
+
+    <!-- Image Zoom Overlay -->
+    <div id="zoomOverlay" class="fixed inset-0 bg-black z-[100] hidden flex flex-col justify-center items-center opacity-0 transition-opacity duration-300">
+        <button onclick="closeZoom()" class="absolute top-6 right-6 text-white bg-white/20 hover:bg-white/40 rounded-full w-10 h-10 flex items-center justify-center z-[101]"><i class="fas fa-times text-xl"></i></button>
+        <div class="w-full h-full overflow-auto flex justify-center items-center p-2">
+            <img id="zoomedImageSrc" src="" class="zoomed-image max-w-full max-h-full object-contain" onclick="toggleZoom(this)">
+        </div>
+        <div class="absolute bottom-6 text-white/70 text-xs font-bold tracking-widest"><i class="fas fa-hand-pointer mr-1"></i> TAP IMAGE TO ZOOM</div>
+    </div>
+
+    <!-- Firebase Compat SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxOnbYyCZ7lk62mR7Mk2hLq0s72zG-fec",
+            authDomain: "famous-footwear-app.firebaseapp.com",
+            projectId: "famous-footwear-app",
+            storageBucket: "famous-footwear-app.firebasestorage.app",
+            messagingSenderId: "482013718858",
+            appId: "1:482013718858:web:2ca5d2d9d29b48249779b3"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        window.allShoesData = [];
+        let currentCategory = "All";
+        let currentGender = "All"; 
+
+        window.renderShoes = function(shoesArray) {
+            const container = document.getElementById("shoeContainer");
+            const noResults = document.getElementById("noResults");
+            document.getElementById("shoeCount").innerText = `(${shoesArray.length})`;
+            container.innerHTML = "";
+
+            if (shoesArray.length === 0) { noResults.classList.remove("hidden"); return; } 
+            else { noResults.classList.add("hidden"); }
+
+            shoesArray.forEach((shoe) => {
+                const catText = shoe.category || "Footwear";
+                const genderText = shoe.gender || "Mens";
+                const displayCat = `${genderText} • ${catText}`; 
+
+                const mrp = Math.round(shoe.price * 1.5);
+                const displayImg = shoe.imageUrls && shoe.imageUrls.length > 0 ? shoe.imageUrls[0] : shoe.imageUrl;
+                // SOLD OUT Tag Logic for grid
+                const soldOutTag = shoe.isOutOfStock ? `<div class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded z-10 shadow border border-red-800">SOLD OUT</div>` : '';
+
+                container.innerHTML += `
+                    <div class="product-card group relative flex flex-col bg-white">
+                        <div class="product-img-container rounded border border-gray-100 cursor-pointer relative" onclick="openProductModal('${shoe.id}')">
+                            ${soldOutTag}
+                            <img src="${displayImg}" class="product-img bg-white ${shoe.isOutOfStock ? 'opacity-50 grayscale' : ''}">
+                            ${(shoe.imageUrls && shoe.imageUrls.length > 1) ? '<div class="absolute bottom-1.5 right-1.5 bg-white/90 px-1.5 py-0.5 rounded text-[10px] text-dark shadow font-bold"><i class="fas fa-images"></i> ' + shoe.imageUrls.length + '</div>' : ''}
+                        </div>
+                        <div class="pt-2.5 pb-1 flex flex-col cursor-pointer" onclick="openProductModal('${shoe.id}')">
+                            <h4 class="text-xs md:text-sm font-bold text-dark truncate leading-snug">${shoe.name}</h4>
+                            <h3 class="text-[10px] md:text-xs font-semibold text-gray-400 uppercase truncate mt-0.5">${displayCat}</h3>
+                            <div class="mt-1 flex items-center gap-1.5 flex-wrap">
+                                <span class="text-sm md:text-base font-bold text-dark">₹${shoe.price}</span>
+                                <span class="text-[10px] md:text-xs text-gray-400 line-through">₹${mrp}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function loadData() {
+            try {
+                const snapshot = await db.collection("shoes").orderBy("createdAt", "desc").get();
+                document.getElementById("loadingIndicator").style.display = "none";
+                
+                window.allShoesData = [];
+                snapshot.forEach(doc => { 
+                    let data = doc.data(); 
+                    data.id = doc.id; 
+                    window.allShoesData.push(data); 
+                });
+                
+                renderShoes(window.allShoesData);
+            } catch (error) {
+                console.log(error);
+                document.getElementById("loadingIndicator").innerHTML = "Data load nahi ho paaya.";
+            }
+        }
+
+        // 🌟 Combined Filter Logic 🌟
+        window.setCategory = function(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.category-btn').forEach(b => { b.className = "category-btn shrink-0 px-5 py-1.5 rounded-full border border-gray-300 text-gray-600 text-sm font-semibold hover:border-dark transition-colors"; });
+            event.target.className = "category-btn active shrink-0 px-5 py-1.5 rounded-full border border-dark bg-dark text-white text-sm font-semibold transition-colors";
+            applyFilters();
+        }
+
+        window.setGender = function(gen) {
+            currentGender = gen;
+            applyFilters();
+        }
+
+        function applyFilters() {
+            let term = document.getElementById("desktopSearch").value.toLowerCase() || document.getElementById("mobileSearch").value.toLowerCase();
+            let filtered = window.allShoesData;
+            
+            // Filter by Category
+            if(currentCategory !== "All") {
+                filtered = filtered.filter(s => s.category === currentCategory);
+            }
+            // Filter by Gender
+            if(currentGender !== "All") {
+                filtered = filtered.filter(s => s.gender === currentGender);
+            }
+            // Filter by Search text
+            if(term) {
+                filtered = filtered.filter(s => s.name.toLowerCase().includes(term));
+            }
+            
+            renderShoes(filtered);
+        }
+
+        document.getElementById("desktopSearch").addEventListener("input", applyFilters);
+        document.getElementById("mobileSearch").addEventListener("input", applyFilters);
+        
+        function updateBannerUI(isRedeemed, tokenCode) {
+            const bar = document.getElementById('tokenStatusBar');
+            const text = document.getElementById('tokenStatusText');
+            bar.classList.remove('hidden');
+            bar.classList.add('flex');
+            
+            if(isRedeemed) {
+                bar.classList.remove('bg-emerald-600');
+                bar.classList.add('bg-red-600');
+                text.innerHTML = `<i class="fas fa-check-circle mr-1"></i> Badhai Ho! Aapka Token <b>${tokenCode}</b> dukaan par redeem ho chuka hai!`;
+            } else {
+                bar.classList.remove('bg-red-600');
+                bar.classList.add('bg-emerald-600');
+                text.innerHTML = `<i class="fas fa-gift mr-1"></i> Aapka 5% Discount Token <b>${tokenCode}</b> abhi active hai!`;
+            }
+        }
+
+        window.checkSavedTokenStatus = function() {
+            const savedTokenId = localStorage.getItem('myTokenDocId');
+            if(savedTokenId) {
+                try {
+                    db.collection("customers").doc(savedTokenId).onSnapshot(doc => {
+                        if(doc.exists) {
+                            const data = doc.data();
+                            updateBannerUI(data.isRedeemed, data.tokenCode);
+                        }
+                    }, err => console.log(err));
+                } catch(e) {}
+            }
+        };
+
+        window.onload = () => { loadData(); checkSavedTokenStatus(); };
+    </script>
+
+    <!-- Modal, Zoom, Share, Sidebar & Gamification Logic -->
+    <script>
+        const myWhatsAppNumber = "917068059328"; 
+        let currentModalShoe = null;
+        let finalWaLink = "";
+
+        // 🌟 SIDEBAR LOGIC (Myntra Style Hamburger) 🌟
+        window.openSidebar = function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            overlay.classList.remove('hidden');
+            setTimeout(() => { overlay.classList.remove('opacity-0'); }, 10);
+            sidebar.classList.remove('-translate-x-full');
+            document.body.style.overflow = "hidden"; // Prevent background scroll
+        }
+
+        window.closeSidebar = function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => { overlay.classList.add('hidden'); document.body.style.overflow = "auto"; }, 300);
+        }
+
+        window.setGenderFromSidebar = function(gen) {
+            document.getElementById('genderFilter').value = gen; 
+            window.setGender(gen);
+            closeSidebar();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 🌟 Multi-Platform Share Logic 🌟
+        window.openShareModal = function() {
+            if(!currentModalShoe) return;
+            const modal = document.getElementById('shareModal');
+            const content = document.getElementById('shareModalContent');
+            document.getElementById('copyToast').classList.add('hidden'); // Reset toast
+            modal.classList.remove('hidden');
+            setTimeout(() => { 
+                modal.classList.remove('opacity-0'); 
+                content.classList.remove('translate-y-full');
+            }, 10);
+        }
+
+        window.closeShareModal = function() {
+            const modal = document.getElementById('shareModal');
+            const content = document.getElementById('shareModalContent');
+            modal.classList.add('opacity-0'); 
+            content.classList.add('translate-y-full');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        window.shareToPlatform = function(platform) {
+            if(!currentModalShoe) return;
+            // Clean URL without parameters to share correctly
+            const currentUrl = window.location.origin + window.location.pathname; 
+            const shareText = `Famous Footwear की प्रीमियम कलेक्शन देखें!\n\n👟 *${currentModalShoe.name}*\n💰 Price: ₹${currentModalShoe.price}\n\nलिंक पर क्लिक करें: ${currentUrl}`;
+            
+            if(platform === 'whatsapp') {
+                const waLink = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+                window.open(waLink, '_blank');
+                closeShareModal();
+            } else if(platform === 'facebook') {
+                const fbLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}&quote=${encodeURIComponent(shareText)}`;
+                window.open(fbLink, '_blank');
+                closeShareModal();
+            } else if(platform === 'instagram') {
+                // Copy to clipboard fallback for Instagram
+                const dummy = document.createElement("textarea");
+                document.body.appendChild(dummy);
+                dummy.value = shareText;
+                dummy.select();
+                document.execCommand("copy");
+                document.body.removeChild(dummy);
+                
+                const toast = document.getElementById('copyToast');
+                toast.classList.remove('hidden');
+                setTimeout(() => {
+                    closeShareModal();
+                }, 2500);
+            }
+        }
+
+        window.openZoom = function(imgSrc) {
+            const overlay = document.getElementById('zoomOverlay');
+            document.getElementById('zoomedImageSrc').src = imgSrc;
+            document.getElementById('zoomedImageSrc').classList.remove('zoomed');
+            overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+        }
+        window.closeZoom = function() {
+            const overlay = document.getElementById('zoomOverlay');
+            overlay.classList.add('opacity-0'); setTimeout(() => overlay.classList.add('hidden'), 300);
+        }
+        window.toggleZoom = function(imgElement) { imgElement.classList.toggle('zoomed'); }
+        window.closeProductModal = function() {
+            const modal = document.getElementById("productModal");
+            modal.classList.remove("modal-enter"); modal.classList.add("modal-exit");
+            document.body.style.overflow = "auto"; setTimeout(() => modal.classList.add("hidden"), 300);
+        }
+
+        window.openProductModal = function(shoeId) {
+            currentModalShoe = window.allShoesData.find(s => s.id === shoeId);
+            if(!currentModalShoe) return;
+
+            document.getElementById("sizeErrorMsg").classList.add("hidden"); document.getElementById("nameErrorMsg").classList.add("hidden"); document.getElementById("phoneErrorMsg").classList.add("hidden");
+            document.getElementById("selectedSizeValue").value = "";
+            document.getElementById("customerName").value = localStorage.getItem('custName') || "";
+            document.getElementById("customerPhone").value = localStorage.getItem('custPhone') || "";
+            
+            const genderText = currentModalShoe.gender || "Mens";
+            document.getElementById("modalShoeName").innerText = currentModalShoe.name || "Footwear";
+            document.getElementById("modalShoePrice").innerText = currentModalShoe.price || "0";
+            document.getElementById("modalShoeMrp").innerText = "₹" + Math.round((currentModalShoe.price || 0) * 1.5);
+            document.getElementById("modalShoeCat").innerText = `${genderText} • ${currentModalShoe.category || 'FOOTWEAR'}`;
+
+            // Out Of Stock Logic for Submit Button
+            const submitBtn = document.getElementById("submitBtn");
+            const fomoTag = document.getElementById("fomoTag");
+            if(currentModalShoe.isOutOfStock) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fas fa-ban text-xl"></i> Out of Stock`;
+                submitBtn.classList.replace("bg-[#25D366]", "bg-gray-400");
+                submitBtn.classList.replace("hover:bg-[#1DA851]", "hover:bg-gray-400");
+                fomoTag.classList.add("hidden"); // Hide FOMO if out of stock
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fab fa-whatsapp text-xl"></i> Ask Store via WhatsApp`;
+                submitBtn.classList.replace("bg-gray-400", "bg-[#25D366]");
+                submitBtn.classList.replace("hover:bg-gray-400", "hover:bg-[#1DA851]");
+                
+                // Show FOMO with Random Number Logic (between 2 to 5)
+                fomoTag.classList.remove("hidden");
+                const randomStock = Math.floor(Math.random() * 4) + 2; 
+                fomoTag.innerHTML = `<i class="fas fa-fire mr-1"></i> तेज़ी से बिक रहा है! सिर्फ ${randomStock} बचे हैं`;
+            }
+
+            const sizeContainer = document.getElementById("sizeButtonsContainer"); sizeContainer.innerHTML = '';
+            
+            const sizeStr = currentModalShoe.size || "Free Size";
+            sizeStr.split(',').map(s => s.trim()).forEach(s => {
+                if(s) {
+                    const btn = document.createElement('button');
+                    btn.className = "w-12 h-12 rounded-full border border-gray-300 flex items-center justify-center text-sm font-bold text-dark bg-white";
+                    btn.innerText = s;
+                    btn.onclick = function() {
+                        document.querySelectorAll('#sizeButtonsContainer button').forEach(b => b.className = "w-12 h-12 rounded-full border border-gray-300 flex items-center justify-center text-sm font-bold text-dark bg-white");
+                        this.className = "w-12 h-12 rounded-full border border-myntra text-myntra bg-myntra/5 ring-1 ring-myntra flex items-center justify-center text-sm font-bold";
+                        document.getElementById("selectedSizeValue").value = s; document.getElementById("sizeErrorMsg").classList.add("hidden");
+                    };
+                    sizeContainer.appendChild(btn);
+                }
+            });
+
+            const slider = document.getElementById("imageSlider"); const dotsContainer = document.getElementById("sliderDots");
+            slider.innerHTML = ''; dotsContainer.innerHTML = '';
+            const imagesArray = (currentModalShoe.imageUrls && currentModalShoe.imageUrls.length > 0) ? currentModalShoe.imageUrls : [currentModalShoe.imageUrl];
+            imagesArray.forEach((imgUrl, index) => {
+                slider.innerHTML += `<img src="${imgUrl}" class="w-full h-full object-contain snap-item shrink-0 cursor-zoom-in bg-white ${currentModalShoe.isOutOfStock ? 'opacity-50 grayscale' : ''}" onclick="openZoom('${imgUrl}')">`;
+                if(imagesArray.length > 1) dotsContainer.innerHTML += `<div class="${index === 0 ? "bg-myntra" : "bg-gray-300"} w-2 h-2 rounded-full" id="dot-${index}"></div>`;
+            });
+
+            const modal = document.getElementById("productModal");
+            modal.classList.remove("hidden", "modal-exit"); modal.classList.add("modal-enter");
+            document.body.style.overflow = "hidden";
+        }
+
+        // --- SCRATCH CARD LOGIC ---
+        let scratchCanvas = document.getElementById('scratchCanvas');
+        let ctx = scratchCanvas.getContext('2d');
+        let isDrawing = false;
+        let isRevealed = false;
+
+        function initScratchCard() {
+            scratchCanvas.width = scratchCanvas.offsetWidth;
+            scratchCanvas.height = scratchCanvas.offsetHeight;
+            
+            ctx.fillStyle = '#94a3b8'; 
+            ctx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+            
+            ctx.font = 'bold 22px Poppins';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🪙 SCRATCH HERE', scratchCanvas.width/2, scratchCanvas.height/2);
+
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 35; 
+            ctx.globalCompositeOperation = 'destination-out';
+            isRevealed = false;
+            document.getElementById('revealedContent').classList.remove('opacity-100');
+            document.getElementById('revealedContent').classList.add('opacity-0');
+            document.getElementById('finalWaBtn').classList.add('hidden');
+            document.getElementById('scratchHint').classList.remove('hidden');
+            scratchCanvas.style.opacity = '1';
+        }
+
+        function getMousePos(evt) {
+            let rect = scratchCanvas.getBoundingClientRect();
+            let clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+            let clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function startScratch(evt) { isDrawing = true; scratch(evt); }
+        function stopScratch() { isDrawing = false; checkReveal(); }
+        function scratch(evt) {
+            if (!isDrawing || isRevealed) return;
+            evt.preventDefault();
+            let pos = getMousePos(evt);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            checkReveal();
+        }
+
+        scratchCanvas.addEventListener('mousedown', startScratch);
+        scratchCanvas.addEventListener('mousemove', scratch);
+        window.addEventListener('mouseup', stopScratch);
+        scratchCanvas.addEventListener('touchstart', startScratch, {passive: false});
+        scratchCanvas.addEventListener('touchmove', scratch, {passive: false});
+        window.addEventListener('touchend', stopScratch);
+
+        function checkReveal() {
+            if(isRevealed) return;
+            const imageData = ctx.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height);
+            let transparentPixels = 0;
+            for (let i = 3; i < imageData.data.length; i += 4) {
+                if (imageData.data[i] === 0) transparentPixels++;
+            }
+            const clearPercentage = (transparentPixels / (scratchCanvas.width * scratchCanvas.height)) * 100;
+            
+            if (clearPercentage > 30) { 
+                isRevealed = true;
+                scratchCanvas.style.transition = 'opacity 0.5s';
+                scratchCanvas.style.opacity = '0';
+                document.getElementById('revealedContent').classList.replace('opacity-0', 'opacity-100');
+                document.getElementById('finalWaBtn').classList.remove('hidden');
+                document.getElementById('scratchHint').classList.add('hidden');
+                
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 1000 });
+                setTimeout(() => { scratchCanvas.style.display = 'none'; }, 500);
+            }
+        }
+
+        window.generateTokenAndShowScratch = async function() {
+            const btn = document.getElementById("submitBtn");
+            const shoeName = document.getElementById("modalShoeName").innerText;
+            const shoePrice = document.getElementById("modalShoePrice").innerText;
+            const customerSize = document.getElementById("selectedSizeValue").value;
+            const customerName = document.getElementById("customerName").value.trim();
+            const customerPhone = document.getElementById("customerPhone").value.trim();
+
+            let isValid = true;
+            if (!customerSize) { document.getElementById("sizeErrorMsg").classList.remove("hidden"); isValid = false; }
+            if (!customerName) { document.getElementById("nameErrorMsg").classList.remove("hidden"); isValid = false; }
+            if (customerPhone.length < 10) { document.getElementById("phoneErrorMsg").classList.remove("hidden"); isValid = false; }
+            if(!isValid) return;
+
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xl"></i> Loading Gift...`;
+            btn.disabled = true;
+
+            try {
+                localStorage.setItem('custName', customerName);
+                localStorage.setItem('custPhone', customerPhone);
+
+                const token = "FF-" + Math.floor(1000 + Math.random() * 9000);
+
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + 5);
+                const expiryStr = expiryDate.toLocaleDateString('en-IN', {day: 'numeric', month: 'short', year:'numeric'});
+
+                try {
+                    const docRef = await db.collection("customers").add({
+                        name: customerName,
+                        phone: customerPhone,
+                        shoeName: shoeName,
+                        shoeSize: customerSize,
+                        tokenCode: token,
+                        tokenExpiry: firebase.firestore.Timestamp.fromDate(expiryDate),
+                        isRedeemed: false,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    localStorage.setItem('myTokenDocId', docRef.id);
+                } catch(dbErr) { console.log("DB save skipped"); }
+
+                const inquiryMessage = `*FAMOUS FOOTWEAR*\n------------------------\nHello! Mera naam *${customerName}* hai (Ph: ${customerPhone}).\n\nMujhe ye joota dekhna hai:\n👟 *Item:* ${shoeName}\n📏 *Size:* ${customerSize}\n💰 *Price:* ₹${shoePrice}\n\n🎁 *Mera Discount Token:* ${token}\n⏳ *Valid Till:* ${expiryStr}\n\n*(Ye token total bill par 5% chhoot ke liye hai)*\n\nKya ye size dukaan par abhi available hai?`;
+                finalWaLink = `https://wa.me/${myWhatsAppNumber}?text=${encodeURIComponent(inquiryMessage)}`;
+
+                document.getElementById('displayToken').innerText = token;
+                document.getElementById('expDateText').innerText = expiryStr;
+                scratchCanvas.style.display = 'block'; 
+                
+                const sm = document.getElementById('scratchModal');
+                const smContent = document.getElementById('scratchCardContent');
+                sm.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    sm.classList.remove('opacity-0');
+                    smContent.classList.remove('scale-95');
+                    initScratchCard();
+                }, 10);
+
+            } catch (e) {
+                alert("Koi problem aayi. Please dobara try karein.");
+            } finally {
+                btn.innerHTML = `<i class="fab fa-whatsapp text-xl"></i> Ask Store via WhatsApp`;
+                btn.disabled = false;
+            }
+        }
+
+        window.sendFinalWhatsApp = function() {
+            window.open(finalWaLink, '_blank');
+            closeScratchModal();
+            closeProductModal();
+            checkSavedTokenStatus(); 
+        }
+
+        window.closeScratchModal = function() {
+            const sm = document.getElementById('scratchModal');
+            const smContent = document.getElementById('scratchCardContent');
+            sm.classList.add('opacity-0');
+            smContent.classList.add('scale-95');
+            setTimeout(() => { sm.classList.add('hidden'); }, 300);
+        }
+    </script>
+</body>
+</html>
+           

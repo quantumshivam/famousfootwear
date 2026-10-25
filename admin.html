@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Famous Footwear - Admin Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-100 p-4 md:p-8 min-h-screen font-sans">
+
+    <!-- Header & Tabs -->
+    <div class="max-w-6xl mx-auto mb-6 bg-gray-900 rounded-xl overflow-hidden shadow-lg">
+        <div class="p-4 text-white flex justify-between items-center border-b border-gray-700">
+            <h1 class="text-xl md:text-2xl font-bold"><i class="fas fa-store mr-2 text-[#B04771]"></i>Dukaan Admin</h1>
+            <a href="index.html" target="_blank" class="bg-white text-gray-900 px-4 py-2 rounded font-bold text-sm hover:bg-gray-200 transition">Website Dekhein</a>
+        </div>
+        <div class="flex text-sm font-bold">
+            <button onclick="switchTab('stockTab')" id="btnStock" class="flex-1 py-3 text-center bg-[#B04771] text-white transition-colors">📦 Stock Manage</button>
+            <button onclick="switchTab('customerTab')" id="btnCustomer" class="flex-1 py-3 text-center bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors">👥 Grahak Data (Leads)</button>
+        </div>
+    </div>
+
+    <!-- 🌟 DASHBOARD STATS CARDS 🌟 -->
+    <div class="max-w-6xl mx-auto mb-6 grid grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl shadow p-4 text-center border-b-4 border-blue-500">
+            <h3 class="text-xs md:text-sm text-gray-500 font-bold uppercase mb-1">Total Joote</h3>
+            <p id="statTotalShoes" class="text-2xl md:text-3xl font-black text-gray-800">0</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center border-b-4 border-green-500">
+            <h3 class="text-xs md:text-sm text-gray-500 font-bold uppercase mb-1">Aaj ki Leads</h3>
+            <p id="statTodayLeads" class="text-2xl md:text-3xl font-black text-gray-800">0</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center border-b-4 border-purple-500">
+            <h3 class="text-xs md:text-sm text-gray-500 font-bold uppercase mb-1">Redeemed Tokens</h3>
+            <p id="statRedeemed" class="text-2xl md:text-3xl font-black text-gray-800">0</p>
+        </div>
+    </div>
+
+    <!-- 🌟 TAB 1: STOCK MANAGEMENT 🌟 -->
+    <div id="stockTab" class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-8">
+        <div class="md:col-span-2 bg-white rounded-2xl shadow-xl p-6 h-fit border-t-4 border-[#B04771]">
+            <h2 id="formTitle" class="text-xl font-bold mb-6 text-gray-800 border-b pb-2">👟 Naya Item Dalein</h2>
+            <input type="hidden" id="editId"> 
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm font-bold text-gray-600">Joote Ka Naam *</label>
+                    <input type="text" id="shoeName" class="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B04771] outline-none font-medium">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-bold text-gray-600">Keemat (₹) *</label>
+                        <input type="number" id="shoePrice" class="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B04771] outline-none font-medium">
+                    </div>
+                    <div>
+                        <label class="text-sm font-bold text-gray-600">Size *</label>
+                        <input type="text" id="shoeSize" class="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B04771] outline-none font-medium" placeholder="7, 8, 9">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold text-gray-600">Kiske Liye (Gender) *</label>
+                    <select id="shoeGender" class="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B04771] outline-none font-medium">
+                        <option value="Mens">Mens (Aadmi)</option>
+                        <option value="Womens">Womens (Aurat)</option>
+                        <option value="Boys">Boys (Ladke)</option>
+                        <option value="Girls">Girls (Ladkiyan)</option>
+                        <option value="Unisex">Unisex (Koi bhi)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold text-gray-600">Category *</label>
+                    <select id="shoeCategory" onchange="toggleManualCategory()" class="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B04771] outline-none font-medium">
+                        <option value="Sports/Sneakers">Sports / Sneakers</option>
+                        <option value="Casual">Casual</option>
+                        <option value="Formal">Formal</option>
+                        <option value="Slippers/Sandals">Slippers / Sandals</option>
+                        <option value="Manual">Khud Type Karein (Manual)</option>
+                    </select>
+                    <!-- Manual Category Input Box -->
+                    <input type="text" id="manualCategoryInput" placeholder="Nayi category ka naam likhein..." class="hidden w-full p-3 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B04771] outline-none font-medium bg-gray-50">
+                </div>
+
+                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <label class="text-sm font-bold text-gray-700">Photos Chunein (1 se zyada select karein) *</label>
+                    <input type="file" id="shoeImage" multiple accept="image/*" class="w-full mt-2 text-sm border p-2 rounded bg-white font-medium">
+                    <div id="imagePreviewContainer" class="flex gap-2 mt-3 overflow-x-auto hide-scrollbar"></div>
+                </div>
+                <button id="mainBtn" onclick="handleAction()" class="w-full bg-[#B04771] hover:bg-pink-800 text-white py-3.5 rounded-lg font-bold shadow-md transition-all mt-4 text-lg">
+                    <i class="fas fa-upload mr-2"></i> Website Par Upload Karein
+                </button>
+                <button id="cancelBtn" onclick="resetForm()" class="hidden w-full bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg font-bold mt-2">
+                    Cancel Karein
+                </button>
+            </div>
+            <div id="statusBox" class="hidden mt-4 p-3 rounded-lg text-center font-bold text-sm border"></div>
+        </div>
+
+        <div class="md:col-span-3 bg-white rounded-2xl shadow-xl p-6 border-t-4 border-gray-800">
+            <div class="flex justify-between items-center mb-6 border-b pb-2">
+                <h2 class="text-xl font-bold text-gray-800">📦 Dukaan Ka Stock</h2>
+                <span id="totalItems" class="bg-gray-100 text-[#B04771] text-xs font-bold px-3 py-1 rounded-full border border-gray-200">0 Items</span>
+            </div>
+            <div id="adminProductList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2">
+                <div class="col-span-full text-center text-gray-500 py-10"><i class="fas fa-spinner fa-spin text-3xl mb-2 text-[#B04771]"></i><br>Stock load ho raha hai...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🌟 TAB 2: CUSTOMER LEADS 🌟 -->
+    <div id="customerTab" class="max-w-6xl mx-auto hidden">
+        <div class="bg-white rounded-2xl shadow-xl p-6 border-t-4 border-green-500">
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">👥 Grahak Data (Leads)</h2>
+                    <p class="text-sm text-gray-500">Grahak ki details aur offer token redeem yahan se karein.</p>
+                </div>
+                <button onclick="loadCustomers()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-bold text-sm transition"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[800px]">
+                    <thead>
+                        <tr class="bg-gray-50 border-y border-gray-200">
+                            <th class="p-3 text-sm font-bold text-gray-600">Date</th>
+                            <th class="p-3 text-sm font-bold text-gray-600">Grahak Ka Naam</th>
+                            <th class="p-3 text-sm font-bold text-gray-600">Mobile Number</th>
+                            <th class="p-3 text-sm font-bold text-gray-600">Joote ki Detail & Offer Token</th>
+                            <th class="p-3 text-sm font-bold text-gray-600 text-right">Action (Edit/Delete)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerListBody" class="divide-y divide-gray-100">
+                        <tr><td colspan="5" class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Data load ho raha hai...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxOnbYyCZ7lk62mR7Mk2hLq0s72zG-fec",
+            authDomain: "famous-footwear-app.firebaseapp.com",
+            projectId: "famous-footwear-app",
+            storageBucket: "famous-footwear-app.firebasestorage.app",
+            messagingSenderId: "482013718858",
+            appId: "1:482013718858:web:2ca5d2d9d29b48249779b3"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const imgbbAPIKey = "c02a5397b5965718a2d6598cdd764fa2";
+
+        // 🌟 STATS LISTENER (Realtime Dashboard) 🌟
+        db.collection("shoes").onSnapshot(snap => {
+            document.getElementById("statTotalShoes").innerText = snap.size;
+        });
+
+        db.collection("customers").onSnapshot(snap => {
+            let todayLeads = 0;
+            let redeemedTokens = 0;
+            const todayStr = new Date().toLocaleDateString('en-IN');
+
+            snap.forEach(doc => {
+                const data = doc.data();
+                if(data.isRedeemed === true) redeemedTokens++;
+                if(data.createdAt) {
+                    const docDateStr = data.createdAt.toDate().toLocaleDateString('en-IN');
+                    if(docDateStr === todayStr) todayLeads++;
+                }
+            });
+            document.getElementById("statTodayLeads").innerText = todayLeads;
+            document.getElementById("statRedeemed").innerText = redeemedTokens;
+        });
+
+        // 🌟 TOGGLE MANUAL CATEGORY 🌟
+        window.toggleManualCategory = function() {
+            const select = document.getElementById("shoeCategory");
+            const input = document.getElementById("manualCategoryInput");
+            if(select.value === "Manual") {
+                input.classList.remove("hidden");
+                input.focus();
+            } else {
+                input.classList.add("hidden");
+            }
+        };
+
+        window.switchTab = function(tabName) {
+            document.getElementById('stockTab').classList.add('hidden');
+            document.getElementById('customerTab').classList.add('hidden');
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            document.getElementById('btnStock').className = "flex-1 py-3 text-center transition-colors bg-gray-800 text-gray-300 hover:bg-gray-700";
+            document.getElementById('btnCustomer').className = "flex-1 py-3 text-center transition-colors bg-gray-800 text-gray-300 hover:bg-gray-700";
+            
+            if(tabName === 'stockTab') {
+                document.getElementById('btnStock').className = "flex-1 py-3 text-center bg-[#B04771] text-white transition-colors";
+            } else {
+                document.getElementById('btnCustomer').className = "flex-1 py-3 text-center bg-green-500 text-white transition-colors";
+                loadCustomers();
+            }
+        };
+
+        document.getElementById('shoeImage').addEventListener('change', function(e) {
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = ''; 
+            const files = e.target.files;
+            if(files.length > 0) {
+                for(let i=0; i<files.length; i++) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(files[i]);
+                    img.className = "w-16 h-16 object-cover rounded border border-gray-300 shrink-0";
+                    container.appendChild(img);
+                }
+            }
+        });
+
+        function showStatus(msg, type) {
+            const box = document.getElementById("statusBox");
+            box.classList.remove("hidden", "bg-blue-50", "text-blue-700", "bg-green-50", "text-green-700", "bg-red-50", "text-red-700");
+            if(type === 'loading') box.classList.add("bg-blue-50", "text-blue-700");
+            if(type === 'success') box.classList.add("bg-green-50", "text-green-700");
+            if(type === 'error') box.classList.add("bg-red-50", "text-red-700");
+            box.innerHTML = msg;
+        }
+
+        // STOCK LOAD
+        db.collection("shoes").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+            const listDiv = document.getElementById("adminProductList");
+            document.getElementById("totalItems").innerText = snapshot.size + " Items";
+            listDiv.innerHTML = "";
+            
+            if(snapshot.empty) {
+                listDiv.innerHTML = "<p class='col-span-full text-center text-gray-500 font-bold'>Koi joota upload nahi hai.</p>";
+                return;
+            }
+
+            snapshot.forEach((doc) => {
+                const shoe = doc.data();
+                const displayImage = shoe.imageUrls ? shoe.imageUrls[0] : shoe.imageUrl;
+                const photoCount = shoe.imageUrls ? shoe.imageUrls.length : 1;
+                const displayGender = shoe.gender || 'Mens';
+
+                const stockBtnText = shoe.isOutOfStock ? 'Mark In-Stock' : 'Mark Sold Out';
+                const stockBtnColor = shoe.isOutOfStock ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-orange-100 text-orange-700 hover:bg-orange-200';
+
+                listDiv.innerHTML += `
+                    <div class="border border-gray-200 rounded-lg p-3 flex gap-3 hover:shadow-md transition bg-gray-50 relative">
+                        <div class="relative shrink-0">
+                            <img src="${displayImage}" class="w-20 h-24 rounded object-cover border border-gray-300 bg-white ${shoe.isOutOfStock ? 'opacity-50' : ''}">
+                            <span class="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded"><i class="far fa-images"></i> ${photoCount}</span>
+                        </div>
+                        <div class="flex-grow flex flex-col justify-between overflow-hidden">
+                            <div>
+                                <p class="font-bold text-sm text-gray-800 line-clamp-1">${shoe.name}</p>
+                                <div class="mt-0.5 mb-1">
+                                    <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">${displayGender}</span>
+                                    <span class="text-[10px] bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold">${shoe.category || 'General'}</span>
+                                    ${shoe.isOutOfStock ? '<span class="text-[10px] ml-1 bg-red-600 text-white px-2 py-0.5 rounded font-bold">SOLD OUT</span>' : ''}
+                                </div>
+                                <p class="text-base font-black text-[#B04771]">₹${shoe.price}</p>
+                            </div>
+                            <div class="flex justify-end gap-2 mt-2 border-t pt-2">
+                                <button onclick="toggleStockStatus('${doc.id}', ${shoe.isOutOfStock || false})" class="${stockBtnColor} px-2 py-1 rounded text-xs font-bold"><i class="fas fa-box"></i> ${stockBtnText}</button>
+                                <button onclick="startEdit('${doc.id}', '${shoe.name.replace(/'/g, "\\'")}', '${shoe.price}', '${shoe.size}', '${shoe.category}', '${displayGender}')" class="bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 text-xs font-bold"><i class="fas fa-edit"></i> Edit</button>
+                                <button onclick="deleteItem('${doc.id}')" class="bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 text-xs font-bold"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        // 🌟 CUSTOMER LOAD 🌟
+        window.loadCustomers = async function() {
+            const tbody = document.getElementById("customerListBody");
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Data load ho raha hai...</td></tr>`;
+            
+            try {
+                const snapshot = await db.collection("customers").orderBy("createdAt", "desc").get();
+                tbody.innerHTML = "";
+                
+                if(snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 font-bold text-gray-500">Abhi tak kisi grahak ne inquiry nahi ki hai.</td></tr>`;
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const id = doc.id;
+                    const date = data.createdAt ? data.createdAt.toDate().toLocaleDateString('en-IN') : 'N/A';
+                    
+                   // 🌟 TOKEN REDEEM LOGIC & UI 🌟
+                    let tokenHtml = '';
+                    if(data.tokenCode) {
+                        if(data.isRedeemed) {
+                            let rDate = data.redeemedAt ? data.redeemedAt.toDate().toLocaleString('en-IN', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : 'Done';
+                            tokenHtml = `<div class="mt-2 text-xs"><span class="bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded font-bold"><i class="fas fa-check-circle text-green-500 mr-1"></i> Redeemed on: ${rDate}</span></div>`;
+                        } else {
+                            tokenHtml = `
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="bg-green-100 text-green-800 border border-green-300 px-2 py-1 rounded font-bold text-xs"><i class="fas fa-ticket-alt mr-1"></i> Token: ${data.tokenCode}</span>
+                                <button onclick="redeemOffer('${id}', '${data.name.replace(/'/g, "\\'")}', '${data.phone}', '${data.tokenCode}')" class="bg-[#B04771] hover:bg-pink-800 text-white text-[10px] px-3 py-1.5 rounded font-bold transition shadow-sm active:scale-95"><i class="fas fa-gift mr-1"></i> Redeem Mark Karein</button>
+                            </div>`;
+                        }
+                    }
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 transition border-b border-gray-100">
+                            <td class="p-3 text-sm text-gray-500">${date}</td>
+                            <td class="p-3 text-sm font-bold text-gray-800">${data.name}</td>
+                            <td class="p-3 text-sm font-bold text-[#B04771]">${data.phone}</td>
+                            <td class="p-3 text-sm text-gray-600">
+                                <span class="font-bold text-gray-800 block">${data.shoeName}</span>
+                                <span class="text-xs">Size: ${data.shoeSize}</span>
+                                ${tokenHtml}
+                            </td>
+                            <td class="p-3 flex justify-end gap-2 items-center">
+                                <a href="https://wa.me/91${data.phone}?text=Hello ${data.name}, Famous Footwear se bol raha hu." target="_blank" class="bg-[#25D366] text-white w-8 h-8 rounded flex items-center justify-center hover:bg-green-600" title="WhatsApp Message"><i class="fab fa-whatsapp"></i></a>
+                                <button onclick="editCustomer('${id}', '${data.name}', '${data.phone}')" class="bg-blue-100 text-blue-600 w-8 h-8 rounded flex items-center justify-center hover:bg-blue-200" title="Edit Customer"><i class="fas fa-pencil-alt"></i></button>
+                                <button onclick="deleteCustomer('${id}')" class="bg-red-100 text-red-600 w-8 h-8 rounded flex items-center justify-center hover:bg-red-200" title="Delete Customer"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch(e) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-red-500">Data load nahi hua.</td></tr>`;
+            }
+        };
+
+        // 🌟 REDEEM OFFER FUNCTION (Save DB + Send WhatsApp) 🌟
+        window.redeemOffer = async function(id, name, phone, tokenCode) {
+            if(confirm(`Kya aap sach mein ${name} ka token (${tokenCode}) redeem mark karna chahte hain?`)) {
+                try {
+                    const now = new Date();
+                    
+                    // 1. Update DB (Date + Time)
+                    await db.collection("customers").doc(id).update({
+                        isRedeemed: true,
+                        redeemedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    // 2. Prepare Professional WhatsApp Message
+                    const dateStr = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                    const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+                    const waMsg = `Namaste ${name} Ji, 🙏\n\nFamous Footwear mein aane ke liye dhanyawad! 🎉\n\nAapka 5% discount offer (Token: *${tokenCode}*) safaltapurvak redeem kar liya gaya hai.\n📅 Date: ${dateStr}\n⏰ Time: ${timeStr}\n\nAsha hai aapko apni nayi shopping pasand aayi hogi. Humari nayi collection dekhne ke liye jaldi hi wapas aaiye! ✨\n\n- *Team Famous Footwear* 👟`;
+                    
+                    const waLink = `https://wa.me/91${phone}?text=${encodeURIComponent(waMsg)}`;
+                    
+                    // 3. Open WhatsApp and reload table
+                    alert("Offer successfully redeem ho gaya hai! Ab WhatsApp message bheja jayega.");
+                    window.open(waLink, '_blank');
+                    loadCustomers();
+
+                } catch(e) {
+                    alert("Error: " + e.message);
+                }
+            }
+        };
+
+        // CUSTOMER EDIT & DELETE FUNCTIONS
+        window.editCustomer = async function(id, oldName, oldPhone) {
+            let newName = prompt("Naya naam likhein:", oldName);
+            if(newName === null) return; 
+            
+            let newPhone = prompt("Naya mobile number likhein (10 digit):", oldPhone);
+            if(newPhone === null) return;
+
+            try {
+                await db.collection("customers").doc(id).update({
+                    name: newName.trim(),
+                    phone: newPhone.trim()
+                });
+                alert("Grahak ki detail update ho gayi!");
+                loadCustomers(); 
+            } catch(e) {
+                alert("Error: " + e.message);
+            }
+        };
+
+        window.deleteCustomer = async function(id) {
+            if(confirm("Kya aap sach mein is grahak ka data delete karna chahte hain?")) {
+                try {
+                    await db.collection("customers").doc(id).delete();
+                    loadCustomers(); 
+                } catch(e) {
+                    alert("Error: " + e.message);
+                }
+            }
+        };
+
+        // STOCK ACTIONS
+        window.toggleStockStatus = async function(id, currentStatus) {
+            try {
+                await db.collection("shoes").doc(id).update({
+                    isOutOfStock: !currentStatus
+                });
+            } catch (e) {
+                alert("Status update mein problem aayi: " + e.message);
+            }
+        };
+
+        window.startEdit = function(id, name, price, size, category, gender) {
+            document.getElementById("editId").value = id;
+            document.getElementById("shoeName").value = name;
+            document.getElementById("shoePrice").value = price;
+            document.getElementById("shoeSize").value = size;
+            document.getElementById("shoeGender").value = gender || "Mens";
+            
+            const select = document.getElementById("shoeCategory");
+            let optionExists = Array.from(select.options).some(opt => opt.value === category);
+            
+            if(optionExists) {
+                select.value = category;
+                document.getElementById("manualCategoryInput").classList.add("hidden");
+                document.getElementById("manualCategoryInput").value = "";
+            } else {
+                select.value = "Manual";
+                document.getElementById("manualCategoryInput").classList.remove("hidden");
+                document.getElementById("manualCategoryInput").value = category || "";
+            }
+            
+            document.getElementById("formTitle").innerHTML = "<i class='fas fa-pen text-orange-500'></i> Joote Ki Detail Badlein";
+            document.getElementById("mainBtn").innerHTML = "<i class='fas fa-save mr-2'></i> Update Karein";
+            document.getElementById("mainBtn").classList.replace("bg-[#B04771]", "bg-orange-500");
+            document.getElementById("cancelBtn").classList.remove("hidden");
+            document.getElementById('imagePreviewContainer').innerHTML = ''; 
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.resetForm = function() {
+            document.getElementById("editId").value = "";
+            document.getElementById("shoeName").value = "";
+            document.getElementById("shoePrice").value = "";
+            document.getElementById("shoeSize").value = "";
+            document.getElementById("shoeImage").value = "";
+            
+            document.getElementById("shoeGender").value = "Mens";
+            document.getElementById("shoeCategory").value = "Sports/Sneakers";
+            document.getElementById("manualCategoryInput").value = "";
+            document.getElementById("manualCategoryInput").classList.add("hidden");
+
+            document.getElementById('imagePreviewContainer').innerHTML = '';
+            
+            document.getElementById("formTitle").innerHTML = "👟 Naya Item Dalein";
+            document.getElementById("mainBtn").innerHTML = "<i class='fas fa-upload mr-2'></i> Website Par Upload Karein";
+            document.getElementById("mainBtn").classList.replace("bg-orange-500", "bg-[#B04771]");
+            document.getElementById("cancelBtn").classList.add("hidden");
+            document.getElementById("statusBox").classList.add("hidden");
+        };
+
+        window.deleteItem = async function(id) {
+            if(confirm("Kya aap sach mein is joote ko hatana chahte hain?")) {
+                await db.collection("shoes").doc(id).delete();
+            }
+        };
+
+        window.handleAction = async function() {
+            const id = document.getElementById("editId").value;
+            const name = document.getElementById("shoeName").value.trim();
+            const price = document.getElementById("shoePrice").value.trim();
+            const size = document.getElementById("shoeSize").value.trim();
+            const gender = document.getElementById("shoeGender").value;
+            
+            let category = document.getElementById("shoeCategory").value;
+            if (category === "Manual") {
+                category = document.getElementById("manualCategoryInput").value.trim();
+                if(!category) {
+                    showStatus("Kripya nayi category ka naam likhein!", "error");
+                    return;
+                }
+            }
+
+            const imageFiles = document.getElementById("shoeImage").files;
+
+            if(!name || !price || !size) {
+                showStatus("Naam, Keemat aur Size zaroor bharein!", "error");
+                return;
+            }
+
+            document.getElementById("mainBtn").disabled = true;
+
+            try {
+                let finalImageUrls = [];
+                
+                if(imageFiles.length > 0) {
+                    for(let i = 0; i < imageFiles.length; i++) {
+                        showStatus(`<i class='fas fa-spinner fa-spin'></i> Photo ${i+1}/${imageFiles.length} upload ho rahi hai...`, "loading");
+                                              let formData = new FormData();
+                        formData.append("image", imageFiles[i]);
+                        
+                        let res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbAPIKey}`, { method: "POST", body: formData });
+                        let data = await res.json();
+                        if(data.success) {
+                            finalImageUrls.push(data.data.url);
+                        }
+                    }
+                }
+
+                showStatus("<i class='fas fa-spinner fa-spin'></i> Database mein save ho raha hai...", "loading");
+
+                if(id) {
+                    const updateData = { name, price: Number(price), size, category, gender };
+                    if(finalImageUrls.length > 0) {
+                        updateData.imageUrls = finalImageUrls;
+                        updateData.imageUrl = finalImageUrls[0];
+                    }
+                    await db.collection("shoes").doc(id).update(updateData);
+                    showStatus("✅ Jankari update ho gayi!", "success");
+                } else {
+                    if(imageFiles.length === 0) {
+                        showStatus("Naye joote ke liye photo zaroori hai!", "error");
+                        document.getElementById("mainBtn").disabled = false;
+                        return;
+                    }
+                    await db.collection("shoes").add({ 
+                        name, price: Number(price), size, category, gender,
+                        imageUrls: finalImageUrls, imageUrl: finalImageUrls[0],
+                        isOutOfStock: false,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+                    });
+                    showStatus("✅ Naya joota dukaan mein lag gaya!", "success");
+                }
+                setTimeout(() => resetForm(), 2000);
+            } catch (e) { 
+                showStatus("❌ Error: " + e.message, "error"); 
+            } finally {
+                document.getElementById("mainBtn").disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>
